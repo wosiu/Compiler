@@ -2,7 +2,7 @@
 module Main where
 
 
-import System.IO ( stdin, hGetContents )
+import System.IO ( stdin, stderr, hGetContents, hPutStrLn )
 import System.Environment ( getArgs, getProgName )
 
 import LexInstant
@@ -12,45 +12,43 @@ import PrintInstant
 import AbsInstant
 
 
-
-
 import ErrM
 
 type ParseFun a = [Token] -> Err a
 
 myLLexer = myLexer
 
-type Verbosity = Int
+putErr :: String -> IO ()
+putErr s = hPutStrLn stderr s
 
-putStrV :: Verbosity -> String -> IO ()
-putStrV v s = if v > 1 then putStrLn s else return ()
+runFile :: FilePath -> IO ()
+runFile path = putStrLn path >> readFile path >>= run
 
-runFile :: (Print a, Show a) => Verbosity -> ParseFun a -> FilePath -> IO ()
-runFile v p f = putStrLn f >> readFile f >>= run v p
+run :: String -> IO ()
+run code = let ts = myLLexer code in
+	case pProgram ts of
+           Bad s    -> do putErr $ "Parsing failed: " ++ show s
+                          putErr "Tokens:"
+                          putErr $ show ts
+           Ok  tree -> do
+                putStrLn "\nParse Successful!"
+                --showTree tree
+                --runStaticCheck tree
+                --runJVM
 
-run :: (Print a, Show a) => Verbosity -> ParseFun a -> String -> IO ()
-run v p s = let ts = myLLexer s in case p ts of
-           Bad s    -> do putStrLn "\nParse              Failed...\n"
-                          putStrV v "Tokens:"
-                          putStrV v $ show ts
-                          putStrLn s
-           Ok  tree -> do putStrLn "\nParse Successful!"
-                          showTree v tree
 
-
-
-showTree :: (Show a, Print a) => Int -> a -> IO ()
-showTree v tree
+showTree :: (Show a, Print a) => a -> IO ()
+showTree tree
  = do
-      putStrV v $ "\n[Abstract Syntax]\n\n" ++ show tree
-      putStrV v $ "\n[Linearized tree]\n\n" ++ printTree tree
+      putStrLn $ "\n[Abstract Syntax]\n\n" ++ show tree
+      putStrLn $ "\n[Linearized tree]\n\n" ++ printTree tree
 
 main :: IO ()
 main = do args <- getArgs
           case args of
-            [] -> hGetContents stdin >>= run 2 pProgram
-            "-s":fs -> mapM_ (runFile 0 pProgram) fs
-            fs -> mapM_ (runFile 2 pProgram) fs
+            --todo
+            --[] -> hGetContents stdin >>= run pProgram
+            fs -> mapM_ runFile fs
 
 
 
