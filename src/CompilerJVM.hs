@@ -7,10 +7,9 @@ import System.Environment ( getArgs, getProgName )
 
 import LexInstant
 import ParInstant
-import SkelInstant
 import PrintInstant
 import AbsInstant
-
+import StaticCheck ( staticCheck )
 
 import ErrM
 
@@ -22,33 +21,35 @@ putErr :: String -> IO ()
 putErr s = hPutStrLn stderr s
 
 runFile :: FilePath -> IO ()
-runFile path = putStrLn path >> readFile path >>= run
+runFile path = readFile path >>= run
 
 run :: String -> IO ()
 run code = let ts = myLLexer code in
 	case pProgram ts of
-           Bad s    -> do putErr $ "Parsing failed: " ++ show s
-                          putErr "Tokens:"
-                          putErr $ show ts
-           Ok  tree -> do
-                putStrLn "\nParse Successful!"
-                --showTree tree
-                --runStaticCheck tree
-                --runJVM
+		Bad s -> do
+			putErr $ "Parsing failed: " ++ show s
+			putErr "Tokens:"
+			putErr $ show ts
+		Ok tree -> do
+		putStrLn "\nParse Successful!"
+		staticCheck tree
+		--showTree tree
+		--runStaticCheck tree
+		--runJVM
 
 
 showTree :: (Show a, Print a) => a -> IO ()
-showTree tree
- = do
-      putStrLn $ "\n[Abstract Syntax]\n\n" ++ show tree
-      putStrLn $ "\n[Linearized tree]\n\n" ++ printTree tree
+showTree tree = do
+	putStrLn $ "\n[Abstract Syntax]\n\n" ++ show tree
+	putStrLn $ "\n[Linearized tree]\n\n" ++ printTree tree
 
 main :: IO ()
-main = do args <- getArgs
-          case args of
-            --todo
-            --[] -> hGetContents stdin >>= run pProgram
-            fs -> mapM_ runFile fs
+main = do
+	args <- getArgs
+	case args of
+		--todo
+		--[] -> hGetContents stdin >>= run pProgram
+		path -> mapM_ runFile path
 
 
 
