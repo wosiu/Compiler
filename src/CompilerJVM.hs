@@ -10,6 +10,7 @@ import PrintInstant
 import AbsInstant
 import StaticCheck ( staticCheck )
 import TraverseJVM ( compileJVM )
+import TraverseLLVM ( compileLLVM )
 
 myLLexer = myLexer
 
@@ -30,7 +31,7 @@ run code = do
 		Ok tree -> do
 			--putStrLn "\nParse Successful!"
 			staticCheck tree
-			out <- compileJVM tree "nazwa" --todo nazwa
+			out <- compileLLVM tree "nazwa" --todo nazwa
 			putStr out
 			--showTree tree
 			--runStaticCheck tree
