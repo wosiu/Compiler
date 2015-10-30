@@ -12,12 +12,14 @@ type Env = S.Set Ident
 emptyEnv :: Env
 emptyEnv = S.empty
 
-staticCheck :: Program -> IO()
+staticCheck :: Program -> IO Bool
 staticCheck tree = do
 	out <- runErrorT (runReaderT (transProgram tree) emptyEnv)
 	case out of
-		Left err -> hPutStrLn stderr $ "Static check failed: " ++ err
-		Right env -> return ()
+		Left err -> do
+			hPutStrLn stderr $ "Static check failed: " ++ err
+			return False
+		Right env -> return True
 
 
 transProgram :: Program -> Semantics Env

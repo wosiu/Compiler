@@ -18,10 +18,10 @@ putErr :: String -> IO ()
 putErr s = hPutStrLn stderr s
 
 runFile :: FilePath -> IO ()
-runFile path = readFile path >>= run
+runFile path = readFile path >>= run path
 
-run :: String -> IO ()
-run code = do
+run :: String -> String -> IO ()
+run path code = do
 	let ts = myLLexer code
 	case pProgram ts of
 		Bad s -> do
@@ -29,13 +29,12 @@ run code = do
 			putErr "Tokens:"
 			putErr $ show ts
 		Ok tree -> do
-			--putStrLn "\nParse Successful!"
-			staticCheck tree
-			out <- compileLLVM tree "nazwa" --todo nazwa
-			putStr out
-			--showTree tree
-			--runStaticCheck tree
-			--runJVM
+			isCorrect <- staticCheck tree
+			case isCorrect of
+				True -> do
+					out <- compileLLVM tree "nazwa" --todo nazwa
+					putStr out
+				False -> return ()
 
 
 showTree :: (Show a, Print a) => a -> IO ()

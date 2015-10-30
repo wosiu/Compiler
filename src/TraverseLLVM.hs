@@ -24,7 +24,6 @@ emptyRet = Ret { value = "", code = ""}
 
 compileLLVM :: Program -> String -> IO (String)
 compileLLVM tree name = do
-	-- todo remove extension from name and basedir
 	let header = "; author Michal Wos mw792829570@gmail.com\n"
 	content <- runReaderT (transProgram tree) emptyEnv
 	let main = unwords [
