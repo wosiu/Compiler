@@ -1,7 +1,7 @@
 all:
 	cd parser && $(MAKE)
-	ghc --make src/CompilerJVM.hs -i./parser -i./src -DJVM -XScopedTypeVariables -o insc_jvm
-	ghc --make src/CompilerJVM.hs -i./parser -i./src -DLLVM -XScopedTypeVariables -o insc_llvm
+	ghc --make src/Compiler.hs -i./parser -i./src -DJVM -XScopedTypeVariables -o insc_jvm
+	ghc --make src/Compiler.hs -i./parser -i./src -DLLVM -XScopedTypeVariables -o insc_llvm
 clean:
 	-rm -f *.log *.aux *.hi *.o *.dvi insc_jvm
 	cd src && rm -f *.hi *.o
