@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 module Main where
 
 import System.IO ( stdin, stderr, hGetContents, hPutStrLn )
@@ -11,8 +12,32 @@ import ParInstant
 import PrintInstant
 import AbsInstant
 import StaticCheck ( staticCheck )
-import TraverseJVM ( compileJVM )
-import TraverseLLVM ( compileLLVM )
+
+#ifdef JVM
+
+import TraverseJVM ( compile )
+
+runCompiler :: Program -> String -> String -> IO ()
+runCompiler tree basedir name = do
+	out <- compile tree name
+	let newPath = (basedir ++ name ++ ".j")
+	writeFile newPath out
+	_ <- runCommand $ unwords ["java -jar lib/jasmin.jar -d", basedir, newPath, ">> /dev/null"]
+	return ()
+
+#else
+
+import TraverseLLVM ( compile )
+
+runCompiler :: Program -> String -> String -> IO ()
+runCompiler tree basedir name = do
+	out <- compile tree name
+	let newPath = (basedir ++ name ++ ".ll")
+	writeFile newPath out
+	_ <- runCommand $ "llvm-as " ++ newPath
+	return ()
+
+#endif
 
 myLLexer = myLexer
 
@@ -22,21 +47,6 @@ putErr s = hPutStrLn stderr s
 runFile :: FilePath -> IO ()
 runFile path = readFile path >>= run path
 
-runLLVM :: Program -> String -> String -> IO ()
-runLLVM tree basedir name = do
-	out <- compileLLVM tree name
-	let newPath = (basedir ++ name ++ ".ll")
-	writeFile newPath out
-	_ <- runCommand $ "llvm-as " ++ newPath
-	return ()
-
-runJVM :: Program -> String -> String -> IO ()
-runJVM tree basedir name = do
-	out <- compileJVM tree name
-	let newPath = (basedir ++ name ++ ".j")
-	writeFile newPath out
-	_ <- runCommand $ unwords ["java -jar lib/jasmin.jar -d", basedir, newPath, ">> /dev/null"]
-	return ()
 
 run :: String -> String -> IO ()
 run path code = do
@@ -54,7 +64,7 @@ run path code = do
 					let (basedir, file) = splitAt (length path - i) path
 					let (Just j) = findIndex (\a -> a == '.') (reverse file)
 					let name = take (length file - j - 1) file
-					runJVM tree basedir name
+					runCompiler tree basedir name
 					return ()
 				False -> return ()
 

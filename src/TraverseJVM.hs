@@ -23,8 +23,8 @@ data Ret = Ret {
 
 emptyRet = Ret { stack = 0, code = ""}
 
-compileJVM :: Program -> String -> IO (String)
-compileJVM tree name = do
+compile :: Program -> String -> IO (String)
+compile tree name = do
 	-- todo remove extension from name and basedir
 	let header = unwords [
 		"; author: Michal Wos mw792829570@gmail.com",
