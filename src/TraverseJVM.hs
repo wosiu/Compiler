@@ -25,7 +25,6 @@ emptyRet = Ret { stack = 0, code = ""}
 
 compile :: Program -> String -> IO (String)
 compile tree name = do
-	-- todo remove extension from name and basedir
 	let header = unwords [
 		"; author: Michal Wos mw792829570@gmail.com",
 		"\n.class public", name,

@@ -78,8 +78,6 @@ main :: IO ()
 main = do
 	args <- getArgs
 	case args of
-		--todo
-		--[] -> hGetContents stdin >>= run pProgram
 		path -> mapM_ runFile path
 
 
