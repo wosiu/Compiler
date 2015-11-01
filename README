@@ -1,0 +1,4 @@
+1. Kompilacja: make
+2. Uruchamianie: insc_llvm code.ins lub insc_jvm code.ins
+3. W katalogu parser znajdują się pliki wygenerowane przez bnfc,
+w katalogu input przykładowy poprawny i niepoprawny kod dla gramatyki Instant
