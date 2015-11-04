@@ -24,7 +24,11 @@ emptyRet = Ret { value = "", code = ""}
 
 compile :: Program -> String -> IO (String)
 compile tree name = do
-	let header = "; author Michal Wos mw792829570@gmail.com\n"
+	let header = unwords [
+			"; author Michal Wos mw792829570@gmail.com",
+			"\n@.str = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1",
+			"\ndeclare i32 @printf(i8*, ...) #1"
+		]
 	content <- runReaderT (transProgram tree) emptyEnv
 	let main = unwords [
 		"\ndefine i32 @main() #0 {\n",
@@ -67,7 +71,18 @@ transStmt x = do
 						("store i32 " ++ resVal ++ ", i32* " ++ varReg ++ ", align 4"), "\n"]
 				}
 			return (newRet, env)
-		SExp exp -> transExp exp
+		SExp exp -> do
+			(ret, env) <- transExp exp
+			let newReg = "%" ++ (show env)
+			let newRet = Ret {
+               		value = "", -- unused
+               		code = unwords [
+               			code ret,
+               			newReg,
+               			" = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @.str, i32 0,i32 0), i32 "
+               			++ (value ret) ++ ")\n" ]
+               	}
+			return (newRet, env + 1)
 
 _transPairExp :: Exp -> Exp -> String -> Semantics (Ret, Env)
 _transPairExp e1 e2 cmd = do

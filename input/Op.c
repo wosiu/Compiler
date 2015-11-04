@@ -1,11 +1,15 @@
+#include <stdio.h>	
 	int main() {
 		int a = 10;
 		int b;
 		b = 20;
 		int c;
+		(void) printf("%d\n", a);
+		printf("%d\n", b); 
 		//System.out.println(a);
 		//System.out.println(b);
 		c = a + b;
+		printf("%d\n", c);
 		//System.out.println(a);
 		c = a * b;
 		//System.out.println(a);
@@ -27,8 +31,9 @@
 		int d12 = 0;
 		int d13 = 0;
 		2 + 2;
+		printf("%d\n", 2 + 2);
 		a = 2 + 2;
-		a = 2 + b;
+		a = 2 + b;	
 		return 0;
 	}
 
