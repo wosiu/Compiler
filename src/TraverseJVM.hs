@@ -82,7 +82,11 @@ transStmt x = do
 			ret <- transExp exp
 			let newRet = Ret {
 					stack = stack ret,
-					code = unwords [code ret, "pop\n"]
+					code = unwords [
+							"getstatic java/lang/System/out Ljava/io/PrintStream;\n",
+							code ret,
+							"invokevirtual java/io/PrintStream/println(I)V\n"
+						]
 				}
 			return ( env, newRet )
 

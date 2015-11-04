@@ -27,5 +27,8 @@ public class Op  {
 		int d11 = 0;
 		int d12 = 0;
 		int d13 = 0;
+		System.out.println(3);
+		System.out.println(1 + 2*a - b);
+
 	}
 };
