@@ -93,8 +93,8 @@ transStmt x = do
 				}
 			return ( env, newRet )
 
-_transPairExp :: Exp -> Exp -> String -> Semantics Ret
-_transPairExp e1 e2 cmd = do
+_transPairExpOpt :: Exp -> Exp -> String -> Semantics Ret
+_transPairExpOpt e1 e2 cmd = do
 	ret1 <- transExp e1
 	ret2 <- transExp e2
 	let (a, b) = if (stack ret1 < stack ret2) then (ret2, ret1) else (ret1, ret2)
@@ -103,21 +103,23 @@ _transPairExp e1 e2 cmd = do
 			code = unwords [code a, code b, cmd, "\n"]
 		}
 
+_transPairExp :: Exp -> Exp -> String -> Semantics Ret
+_transPairExp e1 e2 cmd = do
+	ret1 <- transExp e1
+	ret2 <- transExp e2
+	-- todo can make swap on stack
+	return Ret {
+			stack = max (stack ret1) (1 + stack ret2),
+			code = unwords [code ret1, code ret2, cmd, "\n"]
+		}
 
 transExp :: Exp -> Semantics Ret
 transExp x = do
 	case x of
-		ExpAdd exp1 exp2 -> _transPairExp exp1 exp2 "iadd"
+		ExpAdd exp1 exp2 -> _transPairExpOpt exp1 exp2 "iadd"
 		ExpSub exp1 exp2 -> _transPairExp exp1 exp2 "isub"
-		ExpMul exp1 exp2 -> _transPairExp exp1 exp2 "imul"
-		ExpDiv exp1 exp2 -> do
-			ret1 <- transExp exp1
-			ret2 <- transExp exp2
-			-- todo can make swap on stack
-			return Ret {
-					stack = max (stack ret1) (1 + stack ret2),
-					code = unwords [code ret1, code ret2, "idiv", "\n"]
-				}
+		ExpMul exp1 exp2 -> _transPairExpOpt exp1 exp2 "imul"
+		ExpDiv exp1 exp2 -> _transPairExp exp1 exp2 "idiv"
 		ExpLit n -> return $ Ret { stack = 1, code = unwords ["bipush", (show n), "\n"] }
 		ExpVar id -> do
 			env <- ask
