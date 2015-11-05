@@ -72,16 +72,19 @@ transStmt x = do
 	case x of
 		SAss id exp -> do
 			ret <- transExp exp
-			let newLoc = 1 + M.size env
+			let (loc, newEnv) =
+				case M.lookup id env of
+					Just loc -> (loc, env)
+					Nothing -> let loc = 1 + (M.size env) in (loc, (M.insert id loc env))
 			let newRet = Ret {
 					stack = (stack ret),
-					code = unwords [code ret, "istore", show newLoc, "\n"]
+					code = unwords [code ret, "istore", show loc, "\n"]
 				}
-			return ( M.insert id newLoc env, newRet )
+			return ( newEnv, newRet )
 		SExp exp -> do
 			ret <- transExp exp
 			let newRet = Ret {
-					stack = stack ret,
+					stack = stack ret + 1,
 					code = unwords [
 							"getstatic java/lang/System/out Ljava/io/PrintStream;\n",
 							code ret,
