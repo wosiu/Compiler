@@ -22,7 +22,7 @@ runCompiler tree basedir name = do
 	out <- compile tree name
 	let newPath = (basedir ++ name ++ ".j")
 	writeFile newPath out
-	_ <- runCommand $ unwords ["java -jar lib/jasmin.jar -d", basedir, newPath, ">> /dev/null"]
+	system $ unwords ["java -jar lib/jasmin.jar -d", basedir, newPath, ">> /dev/null"]
 	return ()
 
 #else
@@ -34,7 +34,7 @@ runCompiler tree basedir name = do
 	out <- compile tree name
 	let newPath = (basedir ++ name ++ ".ll")
 	writeFile newPath out
-	_ <- runCommand $ "llvm-as " ++ newPath
+	system $ "llvm-as " ++ newPath
 	return ()
 
 #endif
