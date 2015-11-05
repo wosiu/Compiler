@@ -76,7 +76,7 @@ transStmt x = do
 				case M.lookup id env of
 					Just loc -> (loc, env)
 					Nothing -> let loc = 1 + (M.size env) in (loc, (M.insert id loc env))
-			let newRet = Ret {
+ 			let newRet = Ret {
 					stack = (stack ret),
 					code = unwords [code ret, "istore", show loc, "\n"]
 				}
@@ -110,7 +110,14 @@ transExp x = do
 		ExpAdd exp1 exp2 -> _transPairExp exp1 exp2 "iadd"
 		ExpSub exp1 exp2 -> _transPairExp exp1 exp2 "isub"
 		ExpMul exp1 exp2 -> _transPairExp exp1 exp2 "imul"
-		ExpDiv exp1 exp2 -> _transPairExp exp1 exp2 "idiv"
+		ExpDiv exp1 exp2 -> do
+			ret1 <- transExp exp1
+			ret2 <- transExp exp2
+			-- todo can make swap on stack
+			return Ret {
+					stack = max (stack ret1) (1 + stack ret2),
+					code = unwords [code ret1, code ret2, "idiv", "\n"]
+				}
 		ExpLit n -> return $ Ret { stack = 1, code = unwords ["bipush", (show n), "\n"] }
 		ExpVar id -> do
 			env <- ask
